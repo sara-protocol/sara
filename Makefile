@@ -96,3 +96,13 @@ help:
 	    t=$$1; \
 	    if (t !~ /^(\.PHONY|\.SUFFIXES|\.DEFAULT|\.PRECIOUS|\.INTERMEDIATE|\.SECONDARY)$$/) print "  - " t \
 	  }' Makefile | sort -u
+
+# Friendly aliases
+.PHONY: docs site publish verify
+
+docs: dashboard
+site: dashboard
+
+publish: release
+
+verify: qa qa-strict
