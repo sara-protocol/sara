@@ -106,3 +106,14 @@ site: dashboard
 publish: release
 
 verify: qa qa-strict
+
+# -----------------------------
+# Pages/site output (stable)
+# -----------------------------
+.PHONY: site
+site: dashboard ## Build Pages site into ./site
+	@mkdir -p site
+	@cp -f build/readiness.html site/index.html
+	@mkdir -p site/assets
+	@cp -rf assets/* site/assets/ 2>/dev/null || true
+	@echo "==> site generated: site/index.html"
