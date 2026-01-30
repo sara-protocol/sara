@@ -1,0 +1,9 @@
+title: "ACRE 出版基础设施示例书（中文）"
+subtitle: "写书 → 出版 → 上架 的工程化模板"
+author: "Your Name"
+lang: "zh-CN"
+rights: "Copyright (c) 2026 Your Name"
+description: "中文示例书：用于验证出版流水线。"
+keywords: [ACRE, publishing, SOP, automation]
+cover-image: "assets/images/cover.jpg"
+date: "2026-01-28"

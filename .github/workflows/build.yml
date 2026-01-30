@@ -1,0 +1,72 @@
+name: build-book-v2
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y             pandoc python3 make             texlive-xetex texlive-fonts-recommended texlive-latex-recommended             fonts-noto-cjk default-jre poppler-utils
+          python3 -m pip install --upgrade pip
+          python3 -m pip install pillow pyyaml
+
+      - name: Install EPUBCheck (tools/epubcheck/epubcheck.jar)
+        run: |
+          mkdir -p tools/epubcheck
+          # Pin version for reproducibility
+          EPUBCHECK_VER=5.1.0
+          curl -L -o /tmp/epubcheck.zip https://github.com/w3c/epubcheck/releases/download/v${EPUBCHECK_VER}/epubcheck-${EPUBCHECK_VER}.zip
+          unzip -q /tmp/epubcheck.zip -d /tmp/epubcheck
+          # epubcheck jar path in zip may vary slightly; copy by find
+          JAR=$(find /tmp/epubcheck -name "epubcheck.jar" | head -n 1)
+          cp "$JAR" tools/epubcheck/epubcheck.jar
+
+      - name: Build (ZH)
+        run: |
+          make LANG=zh all
+
+      - name: Build (EN)
+        run: |
+          make LANG=en all
+
+- name: Apple Books package (ZH)
+  run: |
+    make apple-books-package
+
+- name: Apple Books verify (PR and main)
+  env:
+    ACRE_APPLE_USER: ${{ secrets.ACRE_APPLE_USER }}
+    ACRE_APPLE_PASS: ${{ secrets.ACRE_APPLE_PASS }}
+  run: |
+    # If secrets are not set, skip verify (still build artifacts)
+    if [ -z "${ACRE_APPLE_USER}" ] || [ -z "${ACRE_APPLE_PASS}" ]; then
+      echo "Apple Books secrets not configured; skipping verify."
+      exit 0
+    fi
+    make apple-books-verify
+
+- name: Apple Books upload (main only)
+  if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+  env:
+    ACRE_APPLE_USER: ${{ secrets.ACRE_APPLE_USER }}
+    ACRE_APPLE_PASS: ${{ secrets.ACRE_APPLE_PASS }}
+  run: |
+    if [ -z "${ACRE_APPLE_USER}" ] || [ -z "${ACRE_APPLE_PASS}" ]; then
+      echo "Apple Books secrets not configured; skipping upload."
+      exit 0
+    fi
+    make apple-books-upload
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: book-build
+          path: build/

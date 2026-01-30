@@ -1,0 +1,57 @@
+version: 3
+
+paths:
+  images_dir: "assets/images"
+  figure_glob: "fig-*.*"
+  epubcheck_jar: "tools/epubcheck/epubcheck.jar"
+
+thresholds:
+  image_min_dpi_print: 300
+  image_min_dpi_screen: 150
+
+# 规则级 severity 覆盖（fail|warn|off）
+# rule_id 参考 scripts/qa_engine.py 输出的 rule_id
+rule_severity:
+  # 示例：
+  # l1.missing_image: fail
+  # l1.broken_link: warn
+  # l1.todo_marker: warn
+  # image_dpi.low_dpi: fail
+  # epubcheck.validation: fail
+  # pdf_fonts.not_embedded: fail
+  # chapter_parity.missing_chapter: fail
+  {}
+
+# 默认 severity（当 rule_severity 未配置）
+defaults:
+  severity: fail
+
+# 白名单/黑名单（glob，POSIX 路径，支持 **）
+filters:
+  missing_images:
+    allow: []
+    deny: []
+  broken_links:
+    allow: []
+    deny: []
+  low_dpi_images:
+    allow: []
+    deny: []
+  todo_markers:
+    allow_chapters: []
+    deny_chapters: []
+
+# 基线快照（baseline）文件
+baseline:
+  enabled: true
+  # 建议按语言分别维护；默认会写/读 config/qa_baseline.<lang>.json
+  path_template: "config/qa_baseline.{lang}.json"
+  # 如果 baseline 不存在：
+  # - strict: true  => 直接失败（要求你先 init baseline）
+  # - strict: false => 不启用 baseline（但仍输出 JSON 报告）
+  strict: false
+
+# JSON 报告输出（用于 CI / Dashboard / PR 注释）
+report:
+  enabled: true
+  path_template: "build/{lang}/qa_report.json"

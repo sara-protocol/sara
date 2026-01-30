@@ -1,0 +1,13 @@
+build/
+*.log
+*.aux
+*.out
+*.toc
+*.synctex.gz
+.DS_Store
+Thumbs.db
+__pycache__/
+*.pyc
+.venv/
+ai/drafts/
+ai/diffs/

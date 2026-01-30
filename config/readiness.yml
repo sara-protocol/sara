@@ -1,0 +1,17 @@
+# Publication Readiness Scoring (0–100)
+
+weights:
+  todo: 40          # unfinished TODOs
+  qa_fail: 30       # hard QA failures
+  qa_warn: 10       # QA warnings
+  parity: 10        # zh/en chapter parity issues
+  ai_coverage: 10   # AI-assisted coverage bonus
+
+thresholds:
+  max_todo_per_chapter: 0
+  max_qa_fail: 0
+  max_qa_warn: 0
+
+# Score floors
+floors:
+  with_any_fail: 40

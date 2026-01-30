@@ -1,0 +1,4 @@
+body { line-height: 1.6; font-family: serif; }
+h1,h2,h3 { line-height: 1.25; margin-top: 1.2em; }
+p { text-indent: 2em; margin: 0.6em 0; }
+code, pre { font-family: monospace; white-space: pre-wrap; }

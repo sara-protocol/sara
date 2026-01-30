@@ -1,0 +1,9 @@
+title: "ACRE Publishing Template Sample (EN)"
+subtitle: "Engineering-grade pipeline: write → publish → list"
+author: "Your Name"
+lang: "en-US"
+rights: "Copyright (c) 2026 Your Name"
+description: "English sample used to validate the pipeline."
+keywords: [ACRE, publishing, SOP, automation]
+cover-image: "assets/images/cover.jpg"
+date: "2026-01-28"

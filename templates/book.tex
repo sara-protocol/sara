@@ -1,0 +1,53 @@
+\documentclass[12pt]{book}
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{longtable}
+
+\usepackage{fancyvrb}
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{245,245,245}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+\geometry{a5paper, margin=2cm}
+
+% 字体（按环境修改）
+% Windows: Microsoft YaHei / SimSun
+% macOS: PingFang SC / Songti SC
+% Linux: Noto Serif CJK SC / Noto Sans CJK SC
+\setmainfont{Times New Roman}
+\setCJKmainfont{Microsoft YaHei}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE,RO]{\thepage}
+\fancyhead[LO]{\nouppercase{\leftmark}}
+\fancyhead[RE]{\nouppercase{\rightmark}}
+
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue}
+
+\begin{document}
+
+$if(title)$
+\begin{titlepage}
+\centering
+{\Huge $title$\par}
+\vspace{1cm}
+$if(subtitle)$ {\Large $subtitle$\par}\vspace{1cm} $endif$
+{\Large $author$\par}
+\vfill
+$if(date)$ {\large $date$\par} $endif$
+\end{titlepage}
+$endif$
+
+$if(toc)$
+\tableofcontents
+$endif$
+
+$body$
+
+\end{document}

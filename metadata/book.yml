@@ -1,0 +1,20 @@
+# Book metadata (used for Apple Books packaging)
+title: "YOUR_BOOK_TITLE"
+author: "YOUR_NAME"
+language: "zh"
+description: |
+  Write a compelling description here.
+categories:
+  - "TECHNOLOGY"
+keywords:
+  - "ACRE"
+  - "Publishing"
+publisher: "Independent"
+# ISBN is optional for Apple Books; leave blank for no ISBN
+isbn: ""
+# Apple Books assets
+apple_books:
+  # The display name for the .itmsp package folder
+  package_name: "MyBook"
+  # The epub artifact to deliver
+  epub_path: "build/zh/book.epub"

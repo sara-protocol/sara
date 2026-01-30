@@ -1,0 +1,19 @@
+readiness_threshold: 90
+
+require:
+  qa_all_green: true
+  baseline_no_regression: true
+
+artifacts:
+  - pdf
+  - epub
+  - docx
+
+tag:
+  prefix: "v"
+  source: "release/VERSION"
+
+upload:
+  enabled: false   # set true when credentials are configured
+  targets:
+    - apple_books

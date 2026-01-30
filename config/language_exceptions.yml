@@ -1,0 +1,10 @@
+# 语言章节例外表：用于允许 zh/en 章节编号不完全一致（应尽量少用）
+# 格式：
+# exceptions:
+#   en:
+#     - ch07   # 英文暂缺 ch07
+#   zh:
+#     - ch12   # 中文暂缺 ch12
+exceptions:
+  zh: []
+  en: []
