@@ -86,3 +86,13 @@ apple-books-verify: apple-books-package
 
 apple-books-upload: apple-books-package
 	@ACRE_APPLE_MODE=upload python3 scripts/apple_books_transporter.py
+
+.PHONY: help
+help:
+	@echo "ACRE Publishing OS targets:"
+	@echo ""
+	@awk -F: ' \
+	  /^[A-Za-z0-9][A-Za-z0-9_.\/-]*:([^=]|$$)/ { \
+	    t=$$1; \
+	    if (t !~ /^(\.PHONY|\.SUFFIXES|\.DEFAULT|\.PRECIOUS|\.INTERMEDIATE|\.SECONDARY)$$/) print "  - " t \
+	  }' Makefile | sort -u
