@@ -2,7 +2,7 @@
 """ACRE Chapter Completion Dashboard + Readiness Score"""
 import json
 from pathlib import Path
-from datetime import datetime, UTC
+from datetime import datetime, timezone, UTC
 
 LANGS = ["zh", "en"]
 
@@ -19,7 +19,7 @@ def load_cfg():
 def main():
     cfg = load_cfg()
     dashboard = {
-        "generated_at": datetime.now(datetime.UTC).isoformat(),
+        "generated_at": datetime.now(timezone.utc).isoformat(),
         "chapters": {},
         "readiness": {}
     }
