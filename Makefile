@@ -117,3 +117,15 @@ site: dashboard ## Build Pages site into ./site
 	@mkdir -p site/assets
 	@cp -rf assets/* site/assets/ 2>/dev/null || true
 	@echo "==> site generated: site/index.html"
+
+# -----------------------------
+# Quality gate
+# -----------------------------
+.PHONY: readiness-gate
+readiness-gate: dashboard ## Fail if readiness score != 100
+	@S=$$(python scripts/dashboard.py 2>/dev/null | sed -n 's/^Readiness score: //p' | tail -n 1); \
+	if [ "$$S" != "100" ]; then \
+	  echo "Readiness gate failed: $$S (expected 100)"; \
+	  exit 1; \
+	fi; \
+	echo "Readiness gate passed: $$S"
