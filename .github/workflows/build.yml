@@ -27,7 +27,7 @@ jobs:
             pandoc python3 make \
             texlive-xetex texlive-fonts-recommended texlive-latex-recommended \
             fonts-noto-cjk default-jre poppler-utils \
-            rsync unzip curl
+            unzip curl rsync
           python3 -m pip install --upgrade pip
           python3 -m pip install pillow pyyaml
 
