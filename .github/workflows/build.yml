@@ -45,6 +45,9 @@ jobs:
 
       - name: Build (EN)
         run: make LANG=en all
+      - name: Readiness gate
+        run: make readiness-gate
+
 
       - name: Build site (dashboard -> site/)
         run: |
