@@ -11,3 +11,6 @@ __pycache__/
 .venv/
 ai/drafts/
 ai/diffs/
+
+# Site output (GitHub Pages artifact)
+site/
