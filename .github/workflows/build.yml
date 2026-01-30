@@ -2,8 +2,17 @@ name: build-book-v2
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -14,59 +23,62 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y             pandoc python3 make             texlive-xetex texlive-fonts-recommended texlive-latex-recommended             fonts-noto-cjk default-jre poppler-utils
+          sudo apt-get install -y \
+            pandoc python3 make \
+            texlive-xetex texlive-fonts-recommended texlive-latex-recommended \
+            fonts-noto-cjk default-jre poppler-utils \
+            rsync unzip curl
           python3 -m pip install --upgrade pip
           python3 -m pip install pillow pyyaml
 
       - name: Install EPUBCheck (tools/epubcheck/epubcheck.jar)
         run: |
           mkdir -p tools/epubcheck
-          # Pin version for reproducibility
           EPUBCHECK_VER=5.1.0
           curl -L -o /tmp/epubcheck.zip https://github.com/w3c/epubcheck/releases/download/v${EPUBCHECK_VER}/epubcheck-${EPUBCHECK_VER}.zip
           unzip -q /tmp/epubcheck.zip -d /tmp/epubcheck
-          # epubcheck jar path in zip may vary slightly; copy by find
           JAR=$(find /tmp/epubcheck -name "epubcheck.jar" | head -n 1)
           cp "$JAR" tools/epubcheck/epubcheck.jar
 
       - name: Build (ZH)
-        run: |
-          make LANG=zh all
+        run: make LANG=zh all
 
       - name: Build (EN)
+        run: make LANG=en all
+
+      - name: Build site (dashboard -> site/)
         run: |
-          make LANG=en all
+          make site
+          test -f site/index.html
+          echo "site/index.html OK"
 
-- name: Apple Books package (ZH)
-  run: |
-    make apple-books-package
-
-- name: Apple Books verify (PR and main)
-  env:
-    ACRE_APPLE_USER: ${{ secrets.ACRE_APPLE_USER }}
-    ACRE_APPLE_PASS: ${{ secrets.ACRE_APPLE_PASS }}
-  run: |
-    # If secrets are not set, skip verify (still build artifacts)
-    if [ -z "${ACRE_APPLE_USER}" ] || [ -z "${ACRE_APPLE_PASS}" ]; then
-      echo "Apple Books secrets not configured; skipping verify."
-      exit 0
-    fi
-    make apple-books-verify
-
-- name: Apple Books upload (main only)
-  if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-  env:
-    ACRE_APPLE_USER: ${{ secrets.ACRE_APPLE_USER }}
-    ACRE_APPLE_PASS: ${{ secrets.ACRE_APPLE_PASS }}
-  run: |
-    if [ -z "${ACRE_APPLE_USER}" ] || [ -z "${ACRE_APPLE_PASS}" ]; then
-      echo "Apple Books secrets not configured; skipping upload."
-      exit 0
-    fi
-    make apple-books-upload
-
-      - name: Upload artifacts
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: book-build
-          path: build/
+          path: |
+            build/
+            release/
+            site/
+
+      - name: Setup Pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
