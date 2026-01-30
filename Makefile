@@ -101,7 +101,7 @@ help:
 .PHONY: docs site publish verify
 
 docs: dashboard
-site: dashboard
+site-old: dashboard
 
 publish: release
 
