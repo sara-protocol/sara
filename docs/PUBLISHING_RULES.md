@@ -13,6 +13,7 @@
 CI must run:
 - `make LANG=zh all`
 - `make LANG=en all`
+- `make readiness-gate`
 - `make site`
 
 ## Quality Gate (Hard)
