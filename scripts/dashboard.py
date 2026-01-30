@@ -14,7 +14,7 @@ def load_report(lang):
 
 def load_cfg():
     import yaml
-    return yaml.safe_load(Path("config/readiness.yml").read_text())
+    return yaml.safe_load(Path("config/readiness.yml").read_text(encoding="utf-8"))
 
 def main():
     cfg = load_cfg()
