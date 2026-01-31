@@ -14,3 +14,23 @@ ai/diffs/
 
 # Site output (GitHub Pages artifact)
 site/
+
+# --- local release bundles ---
+release_bundle/
+release_bundle_*.tar.gz
+
+# --- epubcheck runtime ---
+tools/epubcheck/epubcheck.jar
+
+# --- local pandoc header hacks (not needed when --no-highlight) ---
+config/pandoc_highlighting.tex
+
+# --- local release bundles ---
+release_bundle/
+release_bundle_*.tar.gz
+
+# --- epubcheck runtime ---
+tools/epubcheck/epubcheck.jar
+
+# --- local pandoc header hacks (not needed when --no-highlight) ---
+config/pandoc_highlighting.tex

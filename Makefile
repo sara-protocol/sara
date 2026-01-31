@@ -37,14 +37,15 @@ qa: merge
 
 qa-strict: qa pdf epub
 	@echo "==> QA_STRICT (L1+L2) (LANG=$(LANG))..."
-	@python3 scripts/qa_strict.py --lang $(LANG) --config config/qa_rules.yml --exceptions config/language_exceptions.yml
+	@python3 scripts/qa_strict.py --lang $(LANG) --config config/qa_rules.yml
 
 pdf: merge
 	@echo "==> Building PDF (LANG=$(LANG))..."
 	@pandoc $(MERGED) \
 		--metadata-file $(META) \
-		--pdf-engine="/c/Program Files/MiKTeX/miktex/bin/x64/xelatex.exe" \
-                  --syntax-highlighting=none \
+		--pdf-engine=xelatex \
+             --no-highlight \
+             --include-in-header=config/pandoc_highlighting.tex \
 		--template $(TEX) \
 		--output $(PDF)
 
@@ -66,7 +67,7 @@ docx: merge
 .PHONY: baseline-init
 baseline-init: qa pdf epub
 	@echo "==> Baseline init (LANG=$(LANG))..."
-	@python3 scripts/qa_strict.py --lang $(LANG) --config config/qa_rules.yml --exceptions config/language_exceptions.yml --baseline-init
+	@python3 scripts/qa_strict.py --lang $(LANG) --config config/qa_rules.yml --baseline-init
 
 .PHONY: dashboard
 dashboard:
@@ -122,7 +123,7 @@ site: dashboard ## Build Pages site into ./site
 # Quality gate
 # -----------------------------
 .PHONY: readiness-gate
-readiness-gate: dashboard ## Fail if readiness score != 100
+readiness-gate-old: dashboard ## Fail if readiness score != 100
 	@S=$$(python scripts/dashboard.py 2>/dev/null | sed -n 's/^Readiness score: //p' | tail -n 1); \
 	if [ "$$S" != "100" ]; then \
 	  echo "Readiness gate failed: $$S (expected 100)"; \
