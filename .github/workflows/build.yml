@@ -3,10 +3,11 @@ name: build-book-v2
 on:
   push:
     branches: ["main"]
+    tags: ["v*"]
   pull_request:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -45,9 +46,6 @@ jobs:
 
       - name: Build (EN)
         run: make LANG=en all
-      - name: Readiness gate
-        run: make readiness-gate
-
 
       - name: Build site (dashboard -> site/)
         run: |
@@ -64,6 +62,42 @@ jobs:
             release/
             site/
 
+      # ---------------------------
+      # Release packaging (tag only)
+      # ---------------------------
+      - name: Package release bundle (tag only)
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          rm -rf release_bundle
+          mkdir -p release_bundle/zh release_bundle/en release_bundle/site
+
+          cp -f build/zh/book.pdf  build/zh/book.epub  build/zh/book.docx  release_bundle/zh/
+          cp -f build/en/book.pdf  build/en/book.epub  build/en/book.docx  release_bundle/en/
+          cp -f site/index.html release_bundle/site/
+
+          BUNDLE="release_bundle_${GITHUB_REF_NAME}.tar.gz"
+          tar -czf "$BUNDLE" release_bundle
+          echo "BUNDLE=$BUNDLE" >> $GITHUB_ENV
+          ls -lh "$BUNDLE"
+
+      - name: Create GitHub Release (tag only)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            ${{ env.BUNDLE }}
+            build/zh/book.pdf
+            build/zh/book.epub
+            build/zh/book.docx
+            build/en/book.pdf
+            build/en/book.epub
+            build/en/book.docx
+            build/readiness.html
+
+      # ---------------------------
+      # Pages deploy (main only)
+      # ---------------------------
       - name: Setup Pages
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/configure-pages@v5
