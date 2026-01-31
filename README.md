@@ -1,3 +1,4 @@
+
 # ACRE 出版基础设施 v2.0（Template Repo）
 
 v2.0 目标：
@@ -61,3 +62,39 @@ make LANG=en all
 - 每条规则独立 severity（fail|warn|off）
 - Baseline 基线快照（只允许变好）
 - JSON 报告输出（build/<lang>/qa_report.json）
+cd ~/sara
+cat > README.md <<'EOF'
+# ACRE Publishing OS v2
+
+**ACRE Publishing OS v2** is a production-grade, AI-assisted book publishing pipeline with **strict QA gates**, **multi-language single source**, and **multi-format output** (PDF / EPUB / DOCX).
+
+It is designed for authors, publishers, and teams who treat book publishing as **engineering**, not ad-hoc document export.
+
+---
+
+## 🚀 What This Is
+
+ACRE is not a demo.
+
+It is a **fully working publishing operating system**, validated end-to-end on real servers and CI:
+
+- ✅ Markdown → PDF / EPUB / DOCX
+- ✅ zh / en multi-language from one source tree
+- ✅ Strict, configurable QA gates
+- ✅ AI-assisted writing workflow (without polluting main manuscript)
+- ✅ GitHub Actions CI + GitHub Pages publication dashboard
+
+**Live publication readiness dashboard:**  
+👉 https://sara-protocol.github.io/sara/
+
+---
+
+## ✨ Core Features
+
+### 📘 Multi-format Publishing
+- PDF (XeLaTeX, font-embedded)
+- EPUB (EPUBCheck-verified)
+- DOCX (for editors & reviewers)
+
+### 🌍 Multi-language, Single Source
+- 
