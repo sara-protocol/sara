@@ -142,3 +142,8 @@ readiness-gate: dashboard ## Fail if readiness score != 100
 	  exit 1; \
 	fi; \
 	echo "Readiness gate passed: $$S"
+
+.PHONY: init-book
+init-book: ## make init-book NAME=book02
+	@test -n "$(NAME)" || (echo "NAME is required. Example: make init-book NAME=book02" && exit 2)
+	@bash scripts/init_book.sh "$(NAME)"
