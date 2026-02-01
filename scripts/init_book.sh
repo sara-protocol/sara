@@ -2,113 +2,75 @@
 set -euo pipefail
 
 NAME="${1:-}"
-if [[ -z "${NAME}" ]]; then
-  echo "Usage: scripts/init_book.sh <book_repo_name>"
-  exit 1
-fi
+OWNER="${2:-sara-protocol}"     # 需要时可改
+TEMPLATE_DIR="$(pwd)"
 
-ROOT="$(pwd)"
-DEST="${ROOT%/}/${NAME}"
-
-if [[ -e "${DEST}" ]]; then
-  echo "ERR: ${DEST} already exists."
+if [[ -z "$NAME" ]]; then
+  echo "Usage: scripts/init_book.sh <repo_name> [owner]"
   exit 2
 fi
 
-echo "==> Creating new book skeleton at: ${DEST}"
-mkdir -p "${DEST}"
-
-# Copy core skeleton (adjust as needed)
-for d in ai assets bin config docs manuscript metadata scripts templates tools .github; do
-  if [[ -e "${ROOT}/${d}" ]]; then
-    mkdir -p "${DEST}/${d}"
-    rsync -a --exclude ".git" --exclude "build" --exclude "site" --exclude "release_bundle*" \
-      "${ROOT}/${d}/" "${DEST}/${d}/"
-  fi
-done
-
-# Ensure workflows dir exists
-mkdir -p "${DEST}/.github/workflows"
-
-# Write aligned .gitignore
-cat > "${DEST}/.gitignore" <<'EOF'
-# Build outputs
-build/
-site/
-release_bundle/
-release_bundle_*.tar.gz
-
-# Allow QA baselines
-!build/**/qa_baseline.json
-!build/**/qa_report.json
-
-# Tools
-tools/epubcheck/epubcheck.jar
-
-# Python
-.venv/
-__pycache__/
-*.pyc
-
-# OS / Editor
-.DS_Store
-Thumbs.db
-.vscode/
-.idea/
-EOF
-
-# If template repo has the aligned workflow, copy it; else create a sensible default
-if [[ -f "${ROOT}/.github/workflows/build.yml" ]]; then
-  cp -f "${ROOT}/.github/workflows/build.yml" "${DEST}/.github/workflows/build.yml"
+if ! command -v gh >/dev/null 2>&1; then
+  echo "ERROR: gh (GitHub CLI) not found."
+  exit 2
 fi
 
-# Add release notes generator (if present in template)
-if [[ -f "${ROOT}/scripts/gen_release_notes.sh" ]]; then
-  cp -f "${ROOT}/scripts/gen_release_notes.sh" "${DEST}/scripts/gen_release_notes.sh"
-  chmod +x "${DEST}/scripts/gen_release_notes.sh"
+# 1) 复制模板 -> 新目录（排除 .git 与构建产物）
+DEST="${TEMPLATE_DIR}/../${NAME}"
+if [[ -e "$DEST" ]]; then
+  echo "ERROR: destination exists: $DEST"
+  exit 2
 fi
 
-# Fix README title if exists
-if [[ -f "${DEST}/README.md" ]]; then
-  perl -i -pe "s/^# .*/# ${NAME}/" "${DEST}/README.md" || true
+rsync -a --delete \
+  --exclude '.git/' \
+  --exclude 'build/' \
+  --exclude 'site/' \
+  --exclude 'release_bundle*/' \
+  --exclude '*.tar.gz' \
+  "${TEMPLATE_DIR}/" "${DEST}/"
+
+cd "${DEST}"
+
+# 2) 初始化 git（干净起步）
+rm -rf .git
+git init
+git branch -M main
+
+# 3) 基础改名（可按你模板里 metadata 的结构再扩展）
+#    - README: 替换标题里 sara -> book name（很保守）
+if [[ -f README.md ]]; then
+  perl -i -pe "s/\bsara\b/${NAME}/g if \$. <= 5" README.md || true
 fi
 
-# Initialize git repo
-(
-  cd "${DEST}"
-  if [[ ! -d ".git" ]]; then
-    git init -q
-    git branch -M main
-  fi
-)
+# 4) 让 Pages workflow 可用：确保 workflow 文件存在
+test -f .github/workflows/build.yml
 
-cat <<EOF
+# 5) 首次构建（可选：失败也不拦）
+make dashboard >/dev/null 2>&1 || true
+make site >/dev/null 2>&1 || true
 
-==> DONE: ${NAME}
+# 6) 首次提交
+git add -A
+git commit -m "chore: init ${NAME} from ACRE Publishing OS template" >/dev/null
 
-Next steps (recommended):
-  cd ${DEST}
-  git config user.name "sara-protocol"
-  git config user.email "admin@sara-protocol.com"
+# 7) 创建 GitHub 私有仓库 + push
+#    gh repo create 会自动加 origin 并 push（如果 --push）
+gh repo create "${OWNER}/${NAME}" --private --source . --remote origin --push
 
-  # local smoke test
-  make LANG=zh all
-  make LANG=en all
+# 8) 开启 Pages：build_type=workflow（让 Actions deploy-pages 生效）
+#    POST 不存在时创建；已存在则 PUT 更新为 workflow
+if gh api -X POST "repos/${OWNER}/${NAME}/pages" -f build_type=workflow >/dev/null 2>&1; then
+  :
+else
+  gh api -X PUT "repos/${OWNER}/${NAME}/pages" -f build_type=workflow >/dev/null 2>&1 || true
+fi
 
-  # create QA baseline snapshots (then allow commit with -f)
-  make LANG=zh baseline-init
-  make LANG=en baseline-init
-
-  git add -A
-  git commit -m "chore: initialize ${NAME} skeleton"
-  git remote add origin git@github.com:sara-protocol/${NAME}.git
-  git push -u origin main
-
-  # release
-  git tag v0.1.0
-  git push origin v0.1.0
-
-GitHub settings:
-  Settings → Pages → Source = GitHub Actions
-  Settings → Actions → Workflow permissions = Read and write
-EOF
+# 9) 输出访问地址（注意：private repo 的 Pages 是否可访问取决于你的 GitHub 计划/组织设置）
+echo
+echo "✅ Repo: https://github.com/${OWNER}/${NAME}"
+echo "🌐 Pages: https://${OWNER}.github.io/${NAME}/"
+echo
+echo "Next:"
+echo "  - push main => Pages 自动部署（Actions）"
+echo "  - tag vx.y.z => 构建 artifacts（用于 Releases 一键下载）"
