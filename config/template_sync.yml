@@ -1,0 +1,25 @@
+# Template sync rules (sara -> book repos)
+# Only these paths are allowed to be overwritten in book repos.
+
+include:
+  - .github/workflows/build.yml
+  - Makefile
+  - scripts/
+  - templates/
+  - config/qa_rules.yml
+  - config/language_exceptions.yml
+  - config/readiness.yml
+  - config/pandoc_highlighting.tex
+  - docs/
+
+exclude:
+  # Project identity (never override in book repos)
+  - README.md
+  - metadata/
+  - manuscript/
+  - assets/figures/
+  - release/
+  - build/
+  - site/
+  - .git/
+  - .venv/
